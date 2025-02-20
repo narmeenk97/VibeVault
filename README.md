@@ -1,4 +1,4 @@
-# flutter_projects
+# VibeVault
 
 Store and analyze your vibes - Capstone Application
 
