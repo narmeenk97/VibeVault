@@ -3,6 +3,8 @@ import '../pages/dashboard.dart';
 import '../pages/mood_entry.dart';
 import '../pages/analysis.dart';
 
+//Bottom navigation bar logic
+
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
   @override
@@ -12,10 +14,22 @@ class _MainScaffoldState extends State<MainScaffold> {
   //set the index to zero so the app opens on the dashboard page everytime
   int _selectedIndex = 0;
   //List of pages for navigation
-  static final List<Widget> _pages = <Widget>[
-  const DashboardPage(),
-  //add the rest of the pages here
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      DashboardPage(onLogMoodTap: () {
+        setState(() {
+          _selectedIndex = 1;
+        });
+      }),
+      const MoodEntryPage(),
+      //const AnalysisPage(), // Add this once ready
+    ];
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;

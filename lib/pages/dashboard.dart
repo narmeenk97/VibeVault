@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import '../pages/mood_entry.dart';
+import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../pages/analysis.dart';
+import '../helperFunctions/date_formatting.dart';
+import '../pages/mood_details.dart';
+
+//Main dashboard where the app opens and the first page the user sees
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+
+  final VoidCallback onLogMoodTap;
+  const DashboardPage({super.key, required this.onLogMoodTap});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -10,106 +20,187 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
 
+  List<Map<String, dynamic>> pastEntries = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPastMoodEntries();
+  }
+
+  Future<void> fetchPastMoodEntries() async {
+    final url = Uri.parse('https://6jjalnxit7.execute-api.us-east-2.amazonaws.com/prod/getLastMoodEntry');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List data = jsonDecode(response.body);
+        setState(() {
+          pastEntries = data.cast<Map<String, dynamic>>();
+        });
+      }
+    } catch (e) {
+      print('Error fetching mood entries: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+
+    final String todayDate = DateFormat('EEE, MMMM d, y').format(DateTime.now());
     return Scaffold(
-      backgroundColor: Colors.blueAccent,
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      backgroundColor: Colors.deepPurple[50],
+      appBar: AppBar(
+        title: const Text("VibeVault", style: TextStyle(fontWeight: FontWeight.bold),),
+        backgroundColor: Colors.deepPurple[200],
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'help',
+                child: Row(
+                  children: [
+                    Icon(Icons.help_outline, color: Colors.deepPurple),
+                    SizedBox(width: 8),
+                    Text('Help'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            //Log today's mood section
+            //Display todays date
             Container(
-              padding: const EdgeInsets.all(80.0),
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.deepPurpleAccent,
+                color: Colors.deepPurple[100],
                 borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: Colors.deepPurple, width: 1.5),
+              ),
+              child: Text(
+                  'Welcome to a greater sense of self-awareness',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),
+              textAlign: TextAlign.center,
+              ),
+
+            ),
+            const SizedBox(height: 20),
+            //Log Mood button
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple[100],
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: Colors.deepPurple, width: 1.5),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, // ✅ Align text to left
-                mainAxisAlignment: MainAxisAlignment.center, // ✅ Center vertically
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // App Name (VibeVault)
-                  const Text(
-                    "VibeVault",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  const Text('Log Todays Mood', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-
-                  const SizedBox(height: 8),
-
-                  // "Log Today's Mood" Text (Aligned Left)
-                  const Text(
-                    "Log Today's Mood",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // "Log Mood" Button Inside Container
+                //Display todays date
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+              color: Colors.deepPurple[100],
+              borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                todayDate,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              ),
+            ),
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white, //
-                      foregroundColor: Colors.deepPurpleAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 30),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                      onPressed: widget.onLogMoodTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurpleAccent[50],
+                        foregroundColor: Colors.deepPurple,
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 30),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Colors.deepPurple, width: 1.5),
+                        ),
                       ),
-                    ),
-                    onPressed: () {
-                      // Navigate to Mood Entry Page
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MoodEntryPage()),
-                      );
-                    },
-                    child: const Text(
-                      "Log Mood Now",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+                      child: const Text('Log Mood Now'),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            //Past mood entries section
-            const Text(
-              'Past Mood Entries: ',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            //ListView for past entries
-            Expanded(
-              child: ListView.builder(
-                  itemCount: 4,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      elevation: 3,
-                      margin: const EdgeInsets.symmetric(vertical: 5),
-                      child: ListTile(
-                        title: const Text('No entries found',
-                          style: TextStyle(fontSize: 16),
+            const SizedBox(height: 25),
+            //Past mood entries
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Past Mood Entries: ",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      //Navigator.push(context, MaterialPageRoute(builder: (context) => const AnalysisPage()),
+                      // );
+                    },
+                    child: const Text(
+                      "View Analysis",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.deepPurple,
                       ),
                     ),
-                    );
-                  },
-              ),
+                  )
+                ],
+            ),
+            const SizedBox(height: 10),
+            //List view of past mood entries
+            if (pastEntries.isEmpty)
+              const Text('No entries found.'),
+            ...pastEntries.map((entry) {
+            DateTime? entryDate;
+            try {
+              entryDate = DateTime.parse(entry['date']);
+            } catch (e) {
+              entryDate = null;
+            }
+            final formattedDate = entryDate != null
+                ? DateFormatter.formatDate(entryDate)
+                : 'Unknown Date';
+            final day = entry['day'] ?? '';
+            return Card(
+            elevation: 2,
+            color: Colors.deepPurple[100],
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: ListTile(
+              title: Text(
+              "$formattedDate - $day",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: const Text("Click for past vibes!", style: TextStyle(color: Colors.deepPurple),),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+                //navigate to the read only detail page
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MoodDetailsPage(moodEntry: entry),
+                  )
+              );
+            }
             )
-          ],
+            );
+            }
+          )
+          ]
         ),
-      ),
+        )
     );
   }
 }
