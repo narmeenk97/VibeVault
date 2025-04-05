@@ -26,7 +26,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         });
       }),
       const MoodEntryPage(),
-      //const AnalysisPage(), // Add this once ready
+      const AnalysisPage(),
     ];
   }
 
@@ -48,6 +48,7 @@ class _MainScaffoldState extends State<MainScaffold> {
           ],
           currentIndex: _selectedIndex,
         selectedItemColor: Colors.deepPurpleAccent,
+        unselectedItemColor: Colors.deepPurple[300],
         onTap: _onItemTapped,
       ),
     );

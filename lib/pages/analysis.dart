@@ -1,22 +1,180 @@
-/*
-### VibeVault Documentation ###
+import '../widgets/analysis_chart.dart';
+import 'package:flutter/material.dart';
+import '../models/mode_entry_model.dart';
+import '../utils/analysis_service.dart';
 
---- What each file does in the lib folder? ---
+class AnalysisPage extends StatefulWidget {
 
-## main.dart - this is where everything is tied together, this is the main point of entry into the application.
-Currently, this is where I plan to have the logo for the app and then it redirects you to the dashboard.
-## dashboard.dart - this is the homepage of the app, currently its supposed to show today's date and a button that takes you
-to the mood_entry page. Right under that there is a container with the previous days mood data, if there was no data from the
-previous day then it should display an appropriate message like "No mood data logged"
+  const AnalysisPage({super.key});
+  @override
+  _AnalysisPageState createState() => _AnalysisPageState();
+}
 
-## mood_entry.dart - this is main event of the app. This is where the user will actually log their mood data. I want there to be
-sliders for each mood on a scale of 1-5 with small descriptions of each number of the scale to describe what that number means.
-There will be a total of 7 moods that are tracked: Calm, Happy, Energetic, Apathetic, Irritated, Anxious, Depressed.
-There will also be textboxes where the user can leave notes regarding their choice on the scale for each mood, these notes
-can be used later on in the analysis.
+class _AnalysisPageState extends State<AnalysisPage> {
+  final AnalysisService _analysisService = AnalysisService();
+  List<MoodEntry> _entries = [];
+  bool _isLoading = false;
 
-## analysis.dart - Currently I am still figuring out what I exactly want for the analysis. I want to display the trends for the
-user over a period of time like a week, year, or month. I want to display their best day and their worst day. In the future,
-I could use AI to analyze the mood data and give a detailed mood analysis to the user. This will just be informative and not
-to be taken as professional advice. It will just be data analysis.
- */
+  String _selectedTimeRange = '7 Days';
+  String _selectedMood = 'Happy';
+
+  final List<String> _timeRanges = ['7 Days', 'Month', 'Year'];
+  final List<String> _moods = ['Happy', 'Sad', 'Anxious', 'Excited', 'Calm', 'Angry', 'Tired',
+    'Irritable', 'Hangry'];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+  Future<void> _fetchData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      List<MoodEntry> data = await _analysisService.fetchMoodData();
+      setState(() {
+        _entries = data;
+      });
+    } catch (e) {
+      print("Error fetching data: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    //filter by time range using analysis service
+    List<MoodEntry> filteredData = _analysisService.filterDateByTime(_entries, _selectedTimeRange);
+    //group data by day for selected mood
+    Map<String, double> groupedData = _analysisService.groupDateByDay(filteredData, _selectedMood);
+    //chart labels and values
+    List<String> labels = groupedData.keys.toList();
+    List<double> values = groupedData.values.toList();
+    //sort the labels by date ('MM/dd' format)
+    labels.sort((a, b) {
+      List<String> aParts = a.split('/');
+      List<String> bParts = b.split('/');
+      DateTime aDate = DateTime(DateTime.now().year, int.parse(aParts[0]), int.parse(aParts[1]));
+      DateTime bData = DateTime(DateTime.now().year, int.parse(bParts[0]), int.parse(bParts[1]));
+      return aDate.compareTo(bData);
+    });
+
+    return Scaffold(
+      backgroundColor: Colors.deepPurple[50],
+      appBar: AppBar(
+        title: Text('Mood Analysis', style: TextStyle(fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.deepPurple[200],
+          actions: [
+      PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert),
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'help',
+          child: Row(
+            children: [
+              Icon(Icons.help_outline, color: Colors.deepPurple),
+              SizedBox(width: 8),
+              Text('Help'),
+            ],
+          ),
+        ),
+      ],
+    ),
+    ],
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: _isLoading
+        ? Center(child: CircularProgressIndicator())
+        : Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            //time range drop down
+            Row(
+              children: [
+                Text('Time Range: ', style: TextStyle(fontSize: 18, color: Colors.deepPurple[900])),
+                const SizedBox(width: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.deepPurple, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedTimeRange,
+                      icon: Icon(Icons.arrow_drop_down, color: Colors.deepPurple),
+                      items: _timeRanges
+                          .map((range) => DropdownMenuItem(
+                        value: range,
+                        child: Text(range, style: TextStyle(fontSize: 15, color: Colors.deepPurple[900])),
+                      ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedTimeRange = value!;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Mood dropdown
+            Row(
+              children: [
+                Text("Mood: ", style: TextStyle(fontSize: 18, color: Colors.deepPurple[900])),
+                const SizedBox(width: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.deepPurple, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedMood,
+                      icon: Icon(Icons.arrow_drop_down, color: Colors.deepPurple),
+                      items: _moods
+                          .map((mood) => DropdownMenuItem(
+                        value: mood,
+                        child: Text(mood, style: TextStyle(fontSize: 15, color: Colors.deepPurple[900])),
+                      ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedMood = value!;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            // Chart display
+            Expanded(
+              child: groupedData.isEmpty
+                  ? Center(
+                child: Text(
+                  'No data available for the selected options.',
+                  style: TextStyle(fontSize: 15, color: Colors.deepPurple[900]),
+                ),
+              )
+                  : AnalysisChart(
+                labels: labels,
+                values: values,
+                title: '$_selectedMood pattern over the past $_selectedTimeRange',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

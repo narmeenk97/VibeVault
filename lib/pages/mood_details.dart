@@ -1,7 +1,7 @@
 //page for displaying the mood details from a past mood entry
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../helperFunctions/date_formatting.dart';
+import '../utils/date_formatting.dart';
 
 class MoodDetailsPage extends StatelessWidget {
   final Map<String, dynamic> moodEntry;

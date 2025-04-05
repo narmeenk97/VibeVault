@@ -55,9 +55,9 @@ http_parser
 file:///Users/narmeenk/.pub-cache/hosted/pub.dev/http_parser-4.1.2/
 file:///Users/narmeenk/.pub-cache/hosted/pub.dev/http_parser-4.1.2/lib/
 intl
-2.12
-file:///Users/narmeenk/.pub-cache/hosted/pub.dev/intl-0.18.1/
-file:///Users/narmeenk/.pub-cache/hosted/pub.dev/intl-0.18.1/lib/
+3.3
+file:///Users/narmeenk/.pub-cache/hosted/pub.dev/intl-0.20.2/
+file:///Users/narmeenk/.pub-cache/hosted/pub.dev/intl-0.20.2/lib/
 leak_tracker
 3.2
 file:///Users/narmeenk/.pub-cache/hosted/pub.dev/leak_tracker-10.0.8/
@@ -118,6 +118,14 @@ string_scanner
 3.1
 file:///Users/narmeenk/.pub-cache/hosted/pub.dev/string_scanner-1.4.1/
 file:///Users/narmeenk/.pub-cache/hosted/pub.dev/string_scanner-1.4.1/lib/
+syncfusion_flutter_charts
+3.4
+file:///Users/narmeenk/.pub-cache/hosted/pub.dev/syncfusion_flutter_charts-29.1.35/
+file:///Users/narmeenk/.pub-cache/hosted/pub.dev/syncfusion_flutter_charts-29.1.35/lib/
+syncfusion_flutter_core
+3.4
+file:///Users/narmeenk/.pub-cache/hosted/pub.dev/syncfusion_flutter_core-29.1.35/
+file:///Users/narmeenk/.pub-cache/hosted/pub.dev/syncfusion_flutter_core-29.1.35/lib/
 term_glyph
 3.1
 file:///Users/narmeenk/.pub-cache/hosted/pub.dev/term_glyph-1.2.2/

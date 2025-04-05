@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../pages/analysis.dart';
-import '../helperFunctions/date_formatting.dart';
+import '../utils/date_formatting.dart';
 import '../pages/mood_details.dart';
 
 //Main dashboard where the app opens and the first page the user sees
@@ -145,8 +145,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   TextButton(
                     onPressed: () {
-                      //Navigator.push(context, MaterialPageRoute(builder: (context) => const AnalysisPage()),
-                      // );
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const AnalysisPage()),
+                      );
                     },
                     child: const Text(
                       "View Analysis",
